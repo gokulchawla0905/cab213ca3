@@ -1,0 +1,62 @@
+!pip install opencv-python matplotlib
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+from google.colab import files
+
+uploaded = files.upload()
+
+filename = list(uploaded.keys())[0]
+
+image = cv2.imread(filename)
+
+print("Image uploaded successfully!")
+  
+plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+plt.title("Original Road Image")
+plt.axis("off")
+plt.show()
+
+gray = cv2.imread(filename, 0)
+
+edges = cv2.Canny(gray, 50, 150)
+
+plt.imshow(edges, cmap="gray")
+plt.title("Road Damage Edge Detection")
+plt.axis("off")
+plt.show()
+
+contours, hierarchy = cv2.findContours(
+    edges,
+    cv2.RETR_EXTERNAL,
+    cv2.CHAIN_APPROX_SIMPLE
+)
+
+result = image.copy()
+
+count = 0
+
+for c in contours:
+
+    area = cv2.contourArea(c)
+
+    if area > 300:
+
+        x, y, w, h = cv2.boundingRect(c)
+
+        cv2.rectangle(
+            result,
+            (x, y),
+            (x+w, y+h),
+            (255, 0, 0),
+            2
+        )
+
+        count += 1
+
+plt.imshow(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
+plt.title("Possible Damaged Areas")
+plt.axis("off")
+plt.show()
+
+print("Possible damaged areas:", count)
